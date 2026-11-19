@@ -27,9 +27,7 @@ def resumir_corrida(A, b, pivoteo_escalado):
     total_flops = elim_total + sr_total
 
     if pivoteo_escalado:
-        comp_escalas = n * (n - 1)
-        comp_busqueda = int(np.sum([p["divisiones_pivoteo"] - 1 for p in info["pasos"]]))
-        comp_pivoteo = comp_escalas + comp_busqueda
+        comp_pivoteo = int(np.sum([p["comparaciones"] for p in info["pasos"]]))
         div_pivoteo = int(np.sum([p["divisiones_pivoteo"] for p in info["pasos"]]))
         intercambios = int(np.sum([p["intercambios"] for p in info["pasos"]]))
     else:
@@ -113,15 +111,15 @@ def guardar_conteo_markdown(res_con, res_sin):
         "## 4. Sobrecosto de estabilidad (Pivoteo Parcial Escalado)",
         "| Concepto | Cantidad |",
         "| :--- | :---: |",
-        f"| Divisiones de razon ($|u_{{ik}}| / s_i$) | {res_con['div_pivoteo']} |",
-        f"| Comparaciones (132 escalas iniciales + 66 busqueda) | {res_con['comp_pivoteo']} |",
+        f"| Divisiones de razon (u_ik dividido por la escala s_i) | {res_con['div_pivoteo']} |",
+        f"| Comparaciones de busqueda de pivote | {res_con['comp_pivoteo']} |",
         f"| Intercambios de fila realizados | {res_con['intercambios']} |",
         "",
         "## 5. Comparacion entre corridas (Estabilidad y Mantisa)",
         "| Metrica | Con Pivoteo Escalado | Sin Pivoteo |",
         "| :--- | :---: | :---: |",
         f"| Flops aritmeticos | {res_con['total_flops']} | {res_sin['total_flops']} |",
-        f"| Multiplicador maximo ($\\max |m|$) | {res_con['max_multiplicador']:.6e} | {res_sin['max_multiplicador']:.6e} |",
+        f"| Multiplicador maximo (valor absoluto) | {res_con['max_multiplicador']:.6e} | {res_sin['max_multiplicador']:.6e} |",
         f"| Factor de crecimiento ($g$) | {res_con['factor_crecimiento']:.6f} | {res_sin['factor_crecimiento']:.6f} |",
         f"| Bits de mantisa perdidos ($\\log_2 g$) | {res_con['bits_perdidos']:.2f} bits | {res_sin['bits_perdidos']:.2f} bits |",
         "",
@@ -130,28 +128,33 @@ def guardar_conteo_markdown(res_con, res_sin):
     ruta.write_text("\n".join(lineas), encoding="utf-8")
 
 
-def guardar_traza_eliminacion(res_con, res_sin):
+def guardar_traza_eliminacion(A, b, res_con, res_sin):
     RESULTADOS_DIR.mkdir(parents=True, exist_ok=True)
     ruta = RESULTADOS_DIR / "traza_eliminacion.txt"
+    inicial = np.column_stack((A, b))
 
     with open(ruta, "w", encoding="utf-8") as f:
         f.write("TRAZA DE ELIMINACION GAUSSIANA (11 PASOS)\n")
-        f.write("=" * 80 + "\n")
+        f.write("==========================================\n")
 
         for titulo, res in [
             ("CORRIDA 1: CON PIVOTEO PARCIAL ESCALADO", res_con),
             ("CORRIDA 2: SIN PIVOTEO", res_sin),
         ]:
             f.write(f"\n{titulo}\n")
-            f.write("-" * 80 + "\n")
+            f.write("==========================================\n")
+            f.write("\nPaso 0 - Matriz inicial:\n")
+            for fila in inicial:
+                texto_fila = " ".join(f"{val:.17e}" for val in fila[:-1])
+                f.write(f"{texto_fila} | {fila[-1]:.17e}\n")
             for paso in res["info"]["pasos"]:
                 num = paso["paso"]
                 piv_orig = paso["fila_pivote_original"]
                 mat = paso["matriz_aumentada"]
                 f.write(f"\nPaso {num} (pivote usado: fila original {piv_orig}) [U | b]:\n")
                 for fila in mat:
-                    texto_fila = " ".join(f"{val: .6e}" for val in fila[:-1])
-                    f.write(f"  {texto_fila}  | {fila[-1]: .6e}\n")
+                    texto_fila = " ".join(f"{val:.17e}" for val in fila[:-1])
+                    f.write(f"{texto_fila} | {fila[-1]:.17e}\n")
 
 
 if __name__ == "__main__":
@@ -163,5 +166,4 @@ if __name__ == "__main__":
     mostrar_resumen("SIN PIVOTEO", res_sin)
 
     guardar_conteo_markdown(res_con, res_sin)
-    guardar_traza_eliminacion(res_con, res_sin)
-    print("Archivos generados en resultados/: conteo_flops.md y traza_eliminacion.txt")
+    guardar_traza_eliminacion(A, b, res_con, res_sin)
