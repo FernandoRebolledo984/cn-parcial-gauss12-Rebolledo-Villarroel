@@ -57,7 +57,7 @@ def gaussiano(A, b, pivoteo_escalado=True):
                 perm[[k, p]] = perm[[p, k]] #Almacena la posición de cada fila original luego del intercambio del pivoteo
                 paso["intercambios"] = 1
 
-        paso["fila_pivote_original"] = int(perm[k]) + 1 #Almacena la posición original de la fila usada como pivote antes del cambio.
+        paso["fila_pivote_original"] = int(perm[k]) + 1 #Almacena la posición original de la fila usada como pivote despues del intercambio.
 
         for i in range(k + 1, n):
             m = U[i, k] / U[k, k]
@@ -68,7 +68,7 @@ def gaussiano(A, b, pivoteo_escalado=True):
 
             ancho = U[i, k+1:].size     #Trozo de fila desde columna k+1 hasta el final
             paso["muldiv"] += 1+ancho+1 #1 division, 1 multiplicacion y el ancho de la fila.
-            paso["sumres"] += ancho + 1 #Sumas realizadas
+            paso["sumres"] += ancho + 1 #Sumas/restas realizadas
             max_mult = max(max_mult, abs(m)) #Busca en multiplicador más grande con cada iteracion
 
         max_visto = max(max_visto, np.max(np.abs(U))) #Busca el valor más grande visto en la matriz en algun momento
@@ -100,7 +100,7 @@ def resolver_con_lu(L, U, perm, b_nuevo):
     for i in range(1, n):   #Sustitucion progresiva con diagonal = 1
         for j in range(i):
             c[i] = c[i] - L[i, j] * c[j]
-    x = sustitucion_regresiva(U, c)
+    x, x1 = sustitucion_regresiva(U, c)
     return x
 
 def printear_cositas(nombre, info, md, sr):
