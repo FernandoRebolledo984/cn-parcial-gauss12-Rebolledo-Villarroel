@@ -71,21 +71,35 @@ def gaussiano(A, b, pivoteo_escalado=True):
             max_mult = max(max_mult, abs(m)) #Busca en multiplicador más grande con cada iteracion
 
         max_visto = max(max_visto, np.max(np.abs(U))) #Busca el valor más grande visto en la matriz en algun momento
-        paso["matriz_aumentada"] = np.column_stack((U, b_mod))  #
+        paso["matriz_aumentada"] = np.column_stack((U, b_mod))  #Matriz U con el vector b pegado a la derecha
         pasos.append(paso)
 
     info = {"L": L, "perm": perm, "pasos": pasos, "max_multiplicador": max_mult, "factor_crecimiento": max_visto/max_inicial}
     return U, b_mod, info
 
-
 def sustitucion_regresiva(U, b_mod):
     n = len(b_mod)
-    x = np.zeros(n, dtype=np.float64)#12 ceros
+    x = np.zeros(n, dtype=np.float64)   #12 ceros
+    cont = {"muldiv": 0, "sumres": 0}   #Contador
     #despeje de incognita mientras se opera con las ya conocidas desde el numero de la diagonal hacia la derecha.
     for i in range(n - 1, -1, -1):
-        suma = np.dot(U[i, i + 1:], x[i + 1:])
-        x[i] = (b_mod[i] - suma) / U[i, i]
+        s = b_mod[i]
+        for j in range(i+1, n):
+            s = s - U[i, j] * x[j]
+            cont["muldiv"] += 1
+            cont["sumres"] += 1
+        x[i] = s / U[i, i]
+        cont("muldiv") += 1
+    return x, cont
 
+#Resuelve A x = b_nuevo reutilizando L, U y perm sin refactorizar (refinamiento en T4)
+def resolver_con_lu(L, U, perm, b_nuevo):
+    n = len(b_nuevo)
+    c = b_nuevo[perm].astype(np.float64)    #Permutación de filas
+    for i in range(1, n):   #Sustitucion progresiva con diagonal = 1
+        for j in range(i):
+            c[i] = c[i] - L[i, j] * c[j]
+    x, x1 = sustitucion_regresiva(U, c)
     return x
 
 def printear_cositas(nombre, info, md, sr):
