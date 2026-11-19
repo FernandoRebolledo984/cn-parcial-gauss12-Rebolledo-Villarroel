@@ -48,6 +48,7 @@ def gaussiano(A, b, pivoteo_escalado=True):
             razones = np.abs(U[k:, k]) / escalas[k:]
             paso["divisiones_pivoteo"] = razones.size #costo de estabilidad
             p = k + np.argmax(razones)
+            paso["comparaciones"] = razones.size - 1
             if p != k:
                 U[[k, p]] = U[[p, k]]
                 b_mod[[k, p]] = b_mod[[p, k]]
@@ -89,7 +90,7 @@ def sustitucion_regresiva(U, b_mod):
             cont["muldiv"] += 1
             cont["sumres"] += 1
         x[i] = s / U[i, i]
-        cont("muldiv") += 1
+        cont["muldiv"] += 1
     return x, cont
 
 #Resuelve A x = b_nuevo reutilizando L, U y perm sin refactorizar (refinamiento en T4)
