@@ -100,7 +100,7 @@ def resolver_con_lu(L, U, perm, b_nuevo):
     for i in range(1, n):   #Sustitucion progresiva con diagonal = 1
         for j in range(i):
             c[i] = c[i] - L[i, j] * c[j]
-    x, x1 = sustitucion_regresiva(U, c)
+    x = sustitucion_regresiva(U, c)
     return x
 
 def printear_cositas(nombre, info, md, sr):
