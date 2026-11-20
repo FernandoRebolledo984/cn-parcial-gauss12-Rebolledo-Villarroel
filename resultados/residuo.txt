@@ -3,9 +3,9 @@ VERIFICACION INDEPENDIENTE Y CONDICIONAMIENTO
 
 1. Condicionamiento y cota teorica (IEEE 754 float64)
 Epsilon de maquina (eps): 2.220446e-16
-Numero de condicion kappa_2(A): 3.084733e+13
+Numero de condicion kappa_2(A): 3.084727e+13
 Numero de condicion kappa_inf(A): 5.367827e+13
-Cota pesimista kappa_2(A) * eps: 6.849482e-03
+Cota pesimista kappa_2(A) * eps: 6.849469e-03
 Digitos garantizados por cota: 2.16 digitos
 
 2. Norma infinito del residuo r = b - Ax (Decimal 50 digitos)

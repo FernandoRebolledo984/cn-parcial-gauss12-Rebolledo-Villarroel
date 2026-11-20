@@ -39,6 +39,7 @@ def resumir_corrida(A, b, pivoteo_escalado):
     bits_perdidos = math.log2(crecimiento) if crecimiento > 1.0 else 0.0
 
     return {
+        "U": U,
         "x": x,
         "info": info,
         "muldiv_pasos": muldiv_pasos,

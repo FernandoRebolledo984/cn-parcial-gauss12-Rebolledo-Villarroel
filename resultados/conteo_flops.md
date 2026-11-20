@@ -30,14 +30,14 @@
 ## 4. Sobrecosto de estabilidad (Pivoteo Parcial Escalado)
 | Concepto | Cantidad |
 | :--- | :---: |
-| Divisiones de razon ($|u_{ik}| / s_i$) | 77 |
-| Comparaciones (132 escalas iniciales + 66 busqueda) | 198 |
+| Divisiones de razon (u_ik dividido por la escala s_i) | 77 |
+| Comparaciones de busqueda de pivote | 66 |
 | Intercambios de fila realizados | 8 |
 
 ## 5. Comparacion entre corridas (Estabilidad y Mantisa)
 | Metrica | Con Pivoteo Escalado | Sin Pivoteo |
 | :--- | :---: | :---: |
 | Flops aritmeticos | 1354 | 1354 |
-| Multiplicador maximo ($\max |m|$) | 2.465558e+09 | 2.752593e+13 |
+| Multiplicador maximo (valor absoluto) | 2.465558e+09 | 2.752593e+13 |
 | Factor de crecimiento ($g$) | 1.783202 | 2641.224255 |
 | Bits de mantisa perdidos ($\log_2 g$) | 0.83 bits | 11.37 bits |

@@ -129,11 +129,6 @@ def analizar_sistema(A, b, x_con, x_sin, x_ref, x_exact):
     return {"eps": eps, "kappa_2": kappa_2, "kappa_inf": kappa_inf, "cota_error": cota_error, "digitos_cota": digitos_cota, "x_np": x_np,
         "err_rel_con": err_rel_con, "err_rel_sin": err_rel_sin, "err_rel_ref": err_rel_ref, "err_rel_np": err_rel_np, "coef_f7": coef_f7, "dist_rel_f7": dist_rel_f7,}
 
-def estimar_digitos(x_con, x_ref, norm_r1):
-    err_rel = np.abs(x_ref - x_con) / np.abs(x_ref)
-    dig_con = [int(np.floor(-np.log10(e))) if e > 0 else 15 for e in err_rel]
-    dig_ref = [15 if norm_r1 == 0 else min(15, d + 3) for d in dig_con]
-    return dig_con, dig_ref
 
 def guardar_solucion_csv(res):
     RESULTADOS_DIR.mkdir(parents=True, exist_ok=True)
