@@ -50,7 +50,7 @@ def resolver_exacto_decimal(A_dec, b_dec):
     return x_exact
 
 def calcular_residuo_extendido(A_dec, b_dec, x):
-    x_dec = [Decimal(str(float(val))) for val in x] #Toma el valor binario exacto del float64
+    x_dec = [Decimal(float(val)) for val in x] #Toma el valor binario exacto del float64
     n = len(b_dec)
     r_dec = []
     for i in range(n):
@@ -64,7 +64,7 @@ def error_relativo_exacto(x, x_exact):
     max_diff = Decimal(0)
     max_ref = Decimal(0)
     for i in range(len(x_exact)):
-        x_dec = Decimal(str(float(x[i])))
+        x_dec = Decimal(float(x[i]))
         diff = abs(x_dec - x_exact[i])
         if diff > max_diff:
             max_diff = diff
@@ -75,7 +75,7 @@ def error_relativo_exacto(x, x_exact):
 def contar_digitos_exactos(x, x_exact):
     digitos = []
     for i in range(len(x_exact)):
-        x_dec = Decimal(str(float(x[i])))
+        x_dec = Decimal(float(x[i]))
         err_rel = abs(x_dec - x_exact[i]) / abs(x_exact[i])
         if err_rel == 0:
             digitos.append(15)
@@ -115,20 +115,21 @@ def refinar_solucion(A_dec, b_dec, L, U, perm, x0):
 def analizar_sistema(A, b, x_con, x_sin, x_ref, x_exact):
     eps = float(np.finfo(np.float64).eps)
     kappa_2 = float(np.linalg.cond(A, 2))
-    kappa_inf = float(np.linalg.cond(A, np.inf))
+    sv = np.linalg.svd(A, compute_uv=False)
+    sigma_max, sigma_min = float(sv[0]), float(sv[-1])
     cota_error = kappa_2 * eps
     digitos_cota = max(0.0, -float(np.log10(cota_error)))
 
-    x_np = np.linalg.solve(A, b)
+    x_np = np.linalg.solve(A, b)    #El algoritmo llega a la misma solución frente a una biblioteca estándar
     err_rel_con = error_relativo_exacto(x_con, x_exact)
     err_rel_sin = error_relativo_exacto(x_sin, x_exact)
     err_rel_ref = error_relativo_exacto(x_ref, x_exact)
     err_rel_np = error_relativo_exacto(x_np, x_exact)
+    dif_np_con = float((max(abs(x_con)) - max(abs(x_np))) / max(abs(x_np)))
     coef_f7, dist_rel_f7 = verificar_dependencia_f7(A)
 
-    return {"eps": eps, "kappa_2": kappa_2, "kappa_inf": kappa_inf, "cota_error": cota_error, "digitos_cota": digitos_cota, "x_np": x_np,
-        "err_rel_con": err_rel_con, "err_rel_sin": err_rel_sin, "err_rel_ref": err_rel_ref, "err_rel_np": err_rel_np, "coef_f7": coef_f7, "dist_rel_f7": dist_rel_f7,}
-
+    return {"eps": eps, "kappa_2": kappa_2, "cota_error": cota_error, "digitos_cota": digitos_cota, "x_np": x_np, "err_rel_con": err_rel_con,"err_rel_sin": err_rel_sin, 
+            "err_rel_ref": err_rel_ref, "err_rel_np": err_rel_np, "dif_np_con": dif_np_con, "sigma_max": sigma_max, "sigma_min": sigma_min, "coef_f7": coef_f7, "dist_rel_f7": dist_rel_f7,}
 
 def guardar_solucion_csv(res):
     RESULTADOS_DIR.mkdir(parents=True, exist_ok=True)
@@ -142,10 +143,9 @@ def guardar_solucion_csv(res):
         writer = csv.writer(f)
         writer.writerow(["incognita", "valor_pivoteo", "digitos_pivoteo", "valor_refinado", "digitos_refinado",])
         for i in range(len(x_ref)):
-            val_con = f"{x_con[i]:.{dig_con[i]}g}"
-            val_ref = f"{x_ref[i]:.{dig_ref[i]}g}"
+            val_con = f"{x_con[i]:#.{dig_con[i]}g}" #Se le pone el '#' para que se mantenga la cantidad de valores que queremos mostrar,
+            val_ref = f"{x_ref[i]:#.{dig_ref[i]}g}" #mostrando toda la cantidad de dígitos aunque sean 0's.
             writer.writerow([f"x{i + 1}", val_con, dig_con[i], val_ref, dig_ref[i]])
-
 
 def guardar_residuo_txt(res):
     RESULTADOS_DIR.mkdir(parents=True, exist_ok=True)
@@ -159,19 +159,26 @@ def guardar_residuo_txt(res):
         "1. Condicionamiento y cota teorica (IEEE 754 float64)",
         f"Epsilon de maquina (eps): {an['eps']:.6e}",
         f"Numero de condicion kappa_2(A): {an['kappa_2']:.6e}",
-        f"Numero de condicion kappa_inf(A): {an['kappa_inf']:.6e}",
         f"Cota pesimista kappa_2(A) * eps: {an['cota_error']:.6e}",
         f"Digitos garantizados por cota: {an['digitos_cota']:.2f} digitos",
+        f"Valor singular maximo sigma_max(A): {an['sigma_max']:.6e}",
+        f"Valor singular minimo sigma_min(A): {an['sigma_min']:.6e}",
+        f"Casi dependencia: F7 ~ c1*F3 + c2*F5 con c1 = {an['coef_f7'][0]:.6e}, c2 = {an['coef_f7'][1]:.6e}",
+        f"Distancia relativa (norma max) de F7 a esa combinacion: {an['dist_rel_f7']:.6e}",
         "",
         "2. Norma infinito del residuo r = b - Ax (Decimal 50 digitos)",
         f"||r||_inf sin pivoteo: {float(res['norm_r_sin']):.6e}",
         f"||r||_inf con pivoteo escalado (paso 0): {float(res['norm_r0']):.6e}",
         f"||r||_inf tras 1 refinamiento iterativo: {float(res['norm_r1']):.6e}",
         "",
-        "3. Contraste de control con numpy.linalg.solve",
+        "3. Error relativo respecto a la solucion de referencia (Decimal 50 digitos)",
         f"Error relativo sin pivoteo: {an['err_rel_sin']:.6e}",
         f"Error relativo con pivoteo escalado: {an['err_rel_con']:.6e}",
         f"Error relativo tras refinamiento: {an['err_rel_ref']:.6e}",
+        "",
+        "3b. Contraste de control con numpy.linalg.solve (solo control, no sustituye la implementacion propia)",
+        f"Error relativo numpy.linalg.solve: {an['err_rel_np']:.6e}",
+        f"Diferencia relativa max|x_propia - x_numpy| / max|x_numpy|: {an['dif_np_con']:.6e}",        
         "",
         "4. Vector residuo r = b - Ax (Con pivoteo vs Refinado)",
     ]
@@ -188,14 +195,17 @@ def mostrar_verificacion(res):
     print("VERIFICACION Y CONDICIONAMIENTO")
     print("kappa_2(A):", an["kappa_2"])
     print("Cota kappa*eps:", an["cota_error"], "-> digitos cota:", round(an["digitos_cota"], 2))
+    print("sigma_max, sigma_min:", an["sigma_max"], an["sigma_min"])
+    print("Casi dependencia F7 ~ c1*F3 + c2*F5:", an["coef_f7"], "dist. rel.:", an["dist_rel_f7"])
     print("||r||_inf sin pivoteo:", float(res["norm_r_sin"]))
     print("||r||_inf con pivoteo:", float(res["norm_r0"]))
     print("||r||_inf refinado:", float(res["norm_r1"]))
-    print("Error rel. vs numpy (sin, con, ref):", an["err_rel_sin"], an["err_rel_con"], an["err_rel_ref"])
+    print("Error rel. vs referencia Decimal (sin, con, ref):", an["err_rel_sin"], an["err_rel_con"], an["err_rel_ref"])
+    print("Error rel. numpy.linalg.solve:", an["err_rel_np"], "| dif. propia vs numpy:", an["dif_np_con"])
     print()
     for i in range(len(res["x_ref"])):
-        val_con = f"{res['x_con'][i]:.{res['dig_con'][i]}g}"
-        val_ref = f"{res['x_ref'][i]:.{res['dig_ref'][i]}g}"
+        val_con = f"{res['x_con'][i]:#.{res['dig_con'][i]}g}"
+        val_ref = f"{res['x_ref'][i]:#.{res['dig_ref'][i]}g}"
         print(f"x{i + 1}: piv={val_con} ({res['dig_con'][i]} dig) | ref={val_ref} ({res['dig_ref'][i]} dig)")
 
 def ejecutar_verificacion(A, b, filas_a, filas_b, U_con, info_con, x_con, x_sin):
@@ -203,9 +213,7 @@ def ejecutar_verificacion(A, b, filas_a, filas_b, U_con, info_con, x_con, x_sin)
     x_exact = resolver_exacto_decimal(A_dec, b_dec)
 
     r_sin_dec, norm_r_sin = calcular_residuo_extendido(A_dec, b_dec, x_sin)
-    x_ref, r0_dec, norm_r0, r1_dec, norm_r1 = refinar_solucion(
-        A_dec, b_dec, info_con["L"], U_con, info_con["perm"], x_con
-    )
+    x_ref, r0_dec, norm_r0, r1_dec, norm_r1 = refinar_solucion(A_dec, b_dec, info_con["L"], U_con, info_con["perm"], x_con)
     analisis = analizar_sistema(A, b, x_con, x_sin, x_ref, x_exact)
     dig_con = contar_digitos_exactos(x_con, x_exact)
     dig_ref = contar_digitos_exactos(x_ref, x_exact)

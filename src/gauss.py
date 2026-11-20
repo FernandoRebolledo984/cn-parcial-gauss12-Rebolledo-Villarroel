@@ -100,10 +100,10 @@ def resolver_con_lu(L, U, perm, b_nuevo):
     for i in range(1, n):   #Sustitucion progresiva con diagonal = 1
         for j in range(i):
             c[i] = c[i] - L[i, j] * c[j]
-    x, x1 = sustitucion_regresiva(U, c)
+    x, _ = sustitucion_regresiva(U, c)
     return x
 
-def printear_cositas(nombre, info, md, sr):
+def prints(nombre, info, md, sr):
     print(nombre)
     print("Max |m|: ", info["max_multiplicador"])
     print("Factor de crecimiento: ", info["factor_crecimiento"])
@@ -112,10 +112,10 @@ def printear_cositas(nombre, info, md, sr):
 
 if __name__ == "__main__":
     A, b = cargar_datos()
-    for nombre, piv in (("Con piveteo escalado", True), ("SIN pivoteo", False)): #Recorre ambos casos en que se utiliza y no pivoteo.
+    for nombre, piv in (("Con pivoteo escalado", True), ("SIN pivoteo", False)): #Recorre ambos casos en que se utiliza y no pivoteo.
         #U = triangular superior // b_mod = lado derecho transformado // info = diccionario con L, perm, contadores y métricas.
         U, b_mod, info = gaussiano(A, b, pivoteo_escalado=piv) 
         x, cont_sr = sustitucion_regresiva(U, b_mod)
         md = sum(p["muldiv"] for p in info["pasos"]) + cont_sr["muldiv"]
         sr = sum(p["sumres"] for p in info["pasos"]) + cont_sr["sumres"]
-        printear_cositas(nombre, info, md, sr)
+        prints(nombre, info, md, sr)

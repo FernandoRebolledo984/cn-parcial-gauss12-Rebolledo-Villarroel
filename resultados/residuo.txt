@@ -3,31 +3,38 @@ VERIFICACION INDEPENDIENTE Y CONDICIONAMIENTO
 
 1. Condicionamiento y cota teorica (IEEE 754 float64)
 Epsilon de maquina (eps): 2.220446e-16
-Numero de condicion kappa_2(A): 3.084727e+13
-Numero de condicion kappa_inf(A): 5.367827e+13
-Cota pesimista kappa_2(A) * eps: 6.849469e-03
+Numero de condicion kappa_2(A): 3.084733e+13
+Cota pesimista kappa_2(A) * eps: 6.849482e-03
 Digitos garantizados por cota: 2.16 digitos
+Valor singular maximo sigma_max(A): 2.258035e+06
+Valor singular minimo sigma_min(A): 7.320035e-08
+Casi dependencia: F7 ~ c1*F3 + c2*F5 con c1 = 4.177250e+00, c2 = 5.832467e+02
+Distancia relativa (norma max) de F7 a esa combinacion: 2.620650e-03
 
 2. Norma infinito del residuo r = b - Ax (Decimal 50 digitos)
-||r||_inf sin pivoteo: 1.771478e-07
-||r||_inf con pivoteo escalado (paso 0): 3.495802e-10
-||r||_inf tras 1 refinamiento iterativo: 0.000000e+00
+||r||_inf sin pivoteo: 1.771752e-07
+||r||_inf con pivoteo escalado (paso 0): 2.290876e-10
+||r||_inf tras 1 refinamiento iterativo: 2.603187e-10
 
-3. Contraste de control con numpy.linalg.solve
+3. Error relativo respecto a la solucion de referencia (Decimal 50 digitos)
 Error relativo sin pivoteo: 2.080260e-10
-Error relativo con pivoteo escalado: 2.357604e-13
-Error relativo tras refinamiento: 5.934417e-47
+Error relativo con pivoteo escalado: 2.357298e-13
+Error relativo tras refinamiento: 6.015950e-17
+
+3b. Contraste de control con numpy.linalg.solve (solo control, no sustituye la implementacion propia)
+Error relativo numpy.linalg.solve: 5.232221e-13
+Diferencia relativa max|x_propia - x_numpy| / max|x_numpy|: 1.483881e-13
 
 4. Vector residuo r = b - Ax (Con pivoteo vs Refinado)
-r[ 1] inicial = -8.579974e-21 | refinado = 0.000000e+00
-r[ 2] inicial = -8.061571e-12 | refinado = 0.000000e+00
-r[ 3] inicial = -4.502432e-18 | refinado = 0.000000e+00
-r[ 4] inicial = 5.014445e-12 | refinado = 0.000000e+00
-r[ 5] inicial = -8.174063e-20 | refinado = 0.000000e+00
-r[ 6] inicial = 3.495802e-10 | refinado = 0.000000e+00
-r[ 7] inicial = -1.333672e-17 | refinado = 0.000000e+00
-r[ 8] inicial = 2.701263e-11 | refinado = 0.000000e+00
-r[ 9] inicial = -2.245544e-20 | refinado = 0.000000e+00
-r[10] inicial = -3.535176e-12 | refinado = 0.000000e+00
-r[11] inicial = 9.919532e-18 | refinado = 0.000000e+00
-r[12] inicial = 5.271133e-11 | refinado = 0.000000e+00
+r[ 1] inicial = -8.076889e-21 | refinado = -3.460579e-21
+r[ 2] inicial = -8.729114e-13 | refinado = 1.342384e-12
+r[ 3] inicial = -3.592964e-18 | refinado = 2.322764e-18
+r[ 4] inicial = 4.397029e-12 | refinado = -1.927930e-12
+r[ 5] inicial = -8.922330e-20 | refinado = -1.829774e-20
+r[ 6] inicial = 2.290876e-10 | refinado = -2.603187e-10
+r[ 7] inicial = -1.390747e-17 | refinado = -9.806287e-19
+r[ 8] inicial = 3.113764e-11 | refinado = 2.070405e-12
+r[ 9] inicial = -1.802909e-20 | refinado = 9.406368e-21
+r[10] inicial = -3.566634e-12 | refinado = -6.943866e-13
+r[11] inicial = 9.885511e-18 | refinado = -5.689586e-19
+r[12] inicial = 5.163080e-11 | refinado = -9.384789e-12
