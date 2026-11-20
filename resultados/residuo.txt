@@ -1,0 +1,33 @@
+VERIFICACION INDEPENDIENTE Y CONDICIONAMIENTO
+=============================================
+
+1. Condicionamiento y cota teorica (IEEE 754 float64)
+Epsilon de maquina (eps): 2.220446e-16
+Numero de condicion kappa_2(A): 3.084733e+13
+Numero de condicion kappa_inf(A): 5.367827e+13
+Cota pesimista kappa_2(A) * eps: 6.849482e-03
+Digitos garantizados por cota: 2.16 digitos
+
+2. Norma infinito del residuo r = b - Ax (Decimal 50 digitos)
+||r||_inf sin pivoteo: 1.771478e-07
+||r||_inf con pivoteo escalado (paso 0): 3.495802e-10
+||r||_inf tras 1 refinamiento iterativo: 0.000000e+00
+
+3. Contraste de control con numpy.linalg.solve
+Error relativo sin pivoteo: 2.080260e-10
+Error relativo con pivoteo escalado: 2.357604e-13
+Error relativo tras refinamiento: 5.934417e-47
+
+4. Vector residuo r = b - Ax (Con pivoteo vs Refinado)
+r[ 1] inicial = -8.579974e-21 | refinado = 0.000000e+00
+r[ 2] inicial = -8.061571e-12 | refinado = 0.000000e+00
+r[ 3] inicial = -4.502432e-18 | refinado = 0.000000e+00
+r[ 4] inicial = 5.014445e-12 | refinado = 0.000000e+00
+r[ 5] inicial = -8.174063e-20 | refinado = 0.000000e+00
+r[ 6] inicial = 3.495802e-10 | refinado = 0.000000e+00
+r[ 7] inicial = -1.333672e-17 | refinado = 0.000000e+00
+r[ 8] inicial = 2.701263e-11 | refinado = 0.000000e+00
+r[ 9] inicial = -2.245544e-20 | refinado = 0.000000e+00
+r[10] inicial = -3.535176e-12 | refinado = 0.000000e+00
+r[11] inicial = 9.919532e-18 | refinado = 0.000000e+00
+r[12] inicial = 5.271133e-11 | refinado = 0.000000e+00
