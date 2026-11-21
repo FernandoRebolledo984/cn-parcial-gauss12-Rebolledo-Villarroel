@@ -117,4 +117,4 @@ Con n = 1000 la eliminación costaría aproximadamente $2n^{3}$, siendo la busqu
 
 ## 10. Reproducibilidad
 
-Todo el directorio resultados/ se genera ejecutando python src/main.py, con una versión de Python mínima de 3.10, numpy y módulos estándar csv, pathlib y decimal. Numpy se utiliza para álgebra básica
+Todo el directorio resultados/ se genera ejecutando python src/main.py, con una versión de Python mínima de 3.10, numpy (2.5.5) y módulos estándar csv, pathlib y decimal. Numpy se utiliza para álgebra básica
